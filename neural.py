@@ -160,7 +160,7 @@ class NeuralNet:
             net's output
         """
         return [(_in, expected, self.evaluate(_in)) for _in, expected in data]
-
+    
     def train(
         self,
         data: List[Tuple[I, O]],
@@ -184,20 +184,21 @@ class NeuralNet:
             """Computes a single backpropagation pass"""
             for x, y in data:
                 self.back_propagate(x, y, learning_rate, momentum_factor)
-
+        
         def one_pass_with_error() -> float:
             """Computes a single backpropagation pass keeping track of error
 
             Returns:
                 error of pass
             """
+            print(f"Training iteration {count + 1}/{iters}")
             error = 0.0
             for (x, y) in data:
                 error += self.back_propagate(x, y, learning_rate, momentum_factor)
             return error
-
-        print_count = 0 if (print_interval <= 0) else iters // print_interval
-        left_over = iters if (print_interval <= 0) else iters % print_interval
+            print(f"Training iteration {count + 1}/{iters}")
+        print_count = iters // print_interval if print_interval > 0 else 0
+        left_over = iters % print_interval if print_interval > 0 else iters
 
         count = 0
         for i in range(print_count):

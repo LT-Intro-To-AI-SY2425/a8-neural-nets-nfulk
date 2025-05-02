@@ -1,4 +1,4 @@
-from neural import *
+from neural import NeuralNet
 
 # print("Training XOR Network with 2 Hidden Nodes\n")
 
@@ -60,9 +60,8 @@ with open("output.csv", "r") as f:
     raw_data = list(reader)
 
 # Step 2: Extract features and prices
-features = ["bedrooms", "bathrooms", "sqft_living", "sqft_lot", "floors",
-            "waterfront", "view", "condition", "sqft_above", "sqft_basement",
-            "yr_built", "yr_renovated"]
+features = ["bedrooms", "bathrooms", "sqft_living", "floors", "condition", "yr_built"]
+
 
 house_data = []
 for row in raw_data:
@@ -70,8 +69,12 @@ for row in raw_data:
         x = [float(row[feat]) for feat in features]
         y = [float(row["price"])]
         house_data.append((x, y))
-    except:
-        continue  # skip rows with missing/invalid data
+    except Exception as e:
+        print(f"Skipping row due to error: {e}")
+        continue
+
+print(f"Loaded {len(house_data)} usable data points.")
+
 
 # Step 3: Normalize inputs
 def normalize(dataset):
@@ -97,17 +100,22 @@ house_data = normalize(house_data)
 # Step 4: Split into training and test sets
 random.shuffle(house_data)
 split_idx = int(0.8 * len(house_data))
-train_data = house_data[:split_idx]
-test_data = house_data[split_idx:]
+train_data = house_data[:1000]
+test_data = house_data[1000:1200]
 
 # Step 5: Train the neural network
-nn = NeuralNet(len(features), 10, 1)
-nn.train(train_data, iters=10000, print_interval=1000)
+nn = NeuralNet(len(features), 8, 1)
+print("About to train the neural net...")
+nn.train(train_data, iters=1000, print_interval=100)
+print("Training finished.")
+
 
 # Step 6: Test predictions and calculate margin of error
 print("\nPredictions vs. Actual Prices:\n")
+print(f"Testing on {len(test_data)} houses...")
 for inputs, expected in test_data[:25]:  # limit to first 25 for readability
     predicted = nn.evaluate(inputs)[0]
     print(f"Actual: ${expected[0]:,.2f}, Predicted: ${predicted:,.2f}, Error: ${abs(expected[0] - predicted):,.2f}")
+
 
 
